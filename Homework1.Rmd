@@ -1,0 +1,101 @@
+---
+title: "Homework Assignment 1"
+author: "Karl Konz"
+date: "August 28, 2016"
+output: word_document
+---
+
+# Computer Exercise C2
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Load Data:
+
+```{r}
+
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/bwght.Rdata")
+```
+
+
+
+##i. Number of females
+
+The attribute for Gender is called _male_, to find the number of female observations in this data set we will subset to where the male attribute equals zero.
+To find out the number of females we will use the R function subset to find the observations that are not males.
+```{r}
+# Number of females
+females <- subset(data, male == 0)
+nrow(females)
+```
+
+Next we will find the number of females who were smokers during. We will use the cigs attribute determine which observations consume more than zero cigs.
+```{r}
+# Number of female smokers
+Fcigs <- subset(females, cigs > 0)
+nrow(Fcigs)
+```
+
+##ii. What is the average number of cigarettes smoked per day? Is the average a good measure of the "typical" woman in this case?
+
+The average is not a good measure of a typical woman in this case. The average cigs per day for all women is roughly 2. By checking the median number of cigs for females, we can see that most women consume zero cigs per day. 
+```{r}
+# Average number of cigs for males and females
+mean(data$cigs)
+
+# Average number of cigs for females
+mean(females$cigs)
+
+# Median number of cigs consumed by females
+median(females$cigs)
+```
+
+This is also validate by checking the number of women who smoked compared to those who do not.
+```{r}
+FemaleSmokers <- as.array(ifelse(females$cigs == 0, 'No', 'Yes'))
+# Find the distribution of female smokers
+table(FemaleSmokers)
+```
+
+
+
+###iii. Average Number of Cigerettes for females
+A better measurement than that suggested by ii. is to check the average number of cigs consumed by women who are smokers.
+
+```{r}
+ 
+fSmokers <- subset(data, cigs > 0 & male == 0)
+mean(fSmokers$cigs)
+
+```
+
+Here we can see that the average number of cigerettes consumed by women smokers is closer to 12 as opposed to 2 which is the mean cigs per day of all women observations.
+
+###iv. Find the average of fatheduc in the sample. Why are only 1,192 observations used to compute this average?
+There were only 1,192 observations calculated in the average fatheduc because the other 196 obsersvations had no value, or an NA value, for fatheduc.
+
+```{r}
+# Check how many observations have fatheduc being NA
+sum(is.na(data$fatheduc))
+```
+
+The code above shows that there 196 observations with no record for fatheduc, explaining why only 1,192 observations are used to calculate the mean fatheduc.
+
+```{r}
+# Average fatheduc
+mean(data$fatheduc, na.rm = T)
+# Number of observations with fatheduc value
+nrow(subset(data, fatheduc >= 0))
+
+```
+
+
+###v. Report the average family income and its standard deviation in dollars.
+```{r}
+# Average family income in thoughsands of dollars
+mean(data$faminc)
+# Standard deviation of family income
+sd(data$faminc)
+```
