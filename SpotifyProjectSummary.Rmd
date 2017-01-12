@@ -10,51 +10,22 @@ output: pdf_document
 Spotify has become one of the largest data sources for commercial music recordings since it was developed 10 years ago, with currently over 30 million songs available for digital streaming and 100 million active users. While the transition from physical music recordings to digital solutions has been uneasy to say the least, there has been research that suggests the transition has not affected the music industry positively or negatively in any significant way. One clear benefit from this transition is that consumers now leave a digital foot print of their behavior for which a variety of interesting hypothesizes can be tested, especially when integrated with other data sources. For example, do consumers tend to listen to classical music more when they are at work than in their free time? In a complete factorial designed experiment, do athletes who listen to rap music while working out achieve higher performance measures than when they listen to folk music? This research project aims to predict the total number of streams a given track has based on audio features of the track and metrics of the tracks chart performance such as its maximum and minimum positions and how many days the track was on the top 200 charts.  
 For this project we will conduct a predictive analysis using data from the Spotify charts site and data endpoints from their API to attempt to predict the number of streams a given track had while it was on the charts. From the data available, we will create a few derived features and run a random forest model to determine the overall importance of each feature. With the variables that have particularly high influence on the total number of streams an OLS regression will be create with the total number of streams while on the charts as the dependent variable. The reason to run the additional OLS model is that it will be easier to interpret the OLS model than the random forest model. The idea of the project is that the total number of streams that an artist has had can be directly translated into a gross monetary value by multiplying the number of streams by the streaming pay rate. 
 
-# Literature review
-
-The paper _Streaming Reaches Flood Stage: Does Spotify Stimulate or Depress music sales?_ explores current climate of the recorded music industry and if the streaming medium has monetarily influenced the music industry compared to traditional track sales. Overall the conclusion of the article suggests that streaming music has not monetarily changed the industry for better or worse. This project complements the research done in this paper by estimating the monetary returns for artists who have tracks on the daily top 200 charts. While this project is doesn't take traditional physical music recording sales into account, it does give an idea of the returns artists are having when their music hits the top charts. Based on the results from the paper referenced here, one can reasonably skip comparing digital to physical sales unless one wishes to reproduce those findings.
-
-The paper _Using Data in Decision-Making: Analysis from the Music Industry_ sheds light on the changes in the music industry in recent years as well as making suggestions for how and why it is important to utilize data driven decisions in the modern music industry. It references illegal piracy has diminished as music is being consumed through streaming and that there is a lot more information about the consumer that is captured when the consumption is done via digital means. This paper also nicely complements the aims of this project and further aspirations discussed in the introduction and conclusion of this project in terms of integrating multiple data sources to draw new insights from.
-
-
-The focus of the paper _Combining Spotify and Twitter Data for Generating a Recent and Public Dataset for Music Recommendations_ aims to create a recommendation system for predicting like tracks through Spotify and Twitter data. While this papers focus is on recommending systems, this paper is relevant to my project because it utilizes data mining to gather data through twitter to determine how many times a track has been played. This is paper broaches one of the ultimate goals of this project in general which extends beyond the work displayed here. Unfortunately, the recommender algorithms built into Spotify and what was created in the paper referenced above give more weight to artists and tracks that already have high numbers of streams. The final step of this research would be to not only predict within a reasonable estimate the returns for a given artist, but to create recommenders that attempt to level the playing field so to speak for new artists. One way to do this would be to incorporate the "hipster" tag when pulling in artists via API calls. The "hipster" tag returns only results that have artists popularity of 10 and below. Another aim to extend this project once artist genres can be taken into account to also perform hypothesis tests to see if there are certain genres of music that have seasonal effects or are more popular at certain times of the year. Given the time frame of the project for this class, unfortunately the researcher for this project did not have enough time to clean the data in such a way that genres could be clustered into sub groups as opposed to simply treating all of the tracks on the top 200 daily streamed charts as "pop" music. One anecdotal example of a genre that would likely have increased popularity based on seasonal timing would be Christmas music which undoubtedly has higher numbers of streams towards the end of December as opposed to say in May. An application of such modeling techniques would be for a entertainment management company to create a strategic plan for an artist to release certain types of tracks at various times of the year.
-
 # Data
 
 The most time consuming portion of this project was in collecting and cleaning the data. An end user has the ability to view the number of streams for a given track if they are using the GUI, but the API does not allow such data to be pulled. The charts site does however allow an end user to download a given chart via URL downloads which is in the form of a csv. For this project the data from the daily top 200 global charts are used. With this data set a date variable needs to be manually added. In this data the Track ID can be used to query the Spotify API to pull additional details about the tracks can be obtained. The data from the API is in JSON format and will need to be flattened into a flat file for modeling in R utilizing the httr package to make the JSON calls. From the API this project utilizes the Audio Features and Track endpoints. The API allows for 100 calls to be made at a time for the Audio Features and 50 at a time for the track API. The full script for downloading the data from the URLS and the API can be found in the GitHub repository HERE. There are 18 audio features that we will include in the modeling process from, the track popularity metric will be pulled from the Track endpoint, and the total number of streams for each track is obtained from the data downloaded from the charts site. Upon downloading the full data set it should be noted that there are a number of days where the charts are unavailable as well as a small number of tracks where either the track audio features are missing or the track is simply not available through Spotify anymore. To download the data for this project, run the DownloadTop200.R, ReadData.R, and the APIpull.R scripts. The directories will need to changed and the SpotifyData folder will need to be empty so that the downloaded chart data can be downloaded there and rolled up into one dataset.  
 
 
-
-
-
-
-
-
 # Analysis
-
-
-
 
 The first step is to load the data into memory using R and to set the seed so that the results will be reproducible. Next, the data will be partitioned into a training set that will be used to create the model and a testing set that will be used to test the accuracy of the model. In this project, the caret package will be used using the createDataPartition() function and will be split into 60% training data and 40% testing data. 
 
 
-
-
 ```{r, message=F, warning=F}
-
-
-
 # Set the seed to reproduce the same results as shown
 # in this script
-
-
-
 set.seed(654321)
 
-
-
 # Read Data 
-
 SpotifyData <- read.csv("C:/Users/karlk/Desktop/SpotifyData.csv", header = TRUE)
 
 # Load the caret package
@@ -66,7 +37,6 @@ library(randomForest)
 # 60% of the data will be used for training the data and 40% will be used to test the model
 
 InTrain <- createDataPartition(y=log(SpotifyData$SumChartStreams), p = .60, list=FALSE)
-
 training <- SpotifyData[InTrain, ]
 testing <- SpotifyData[-InTrain, ]
 ```
@@ -91,11 +61,6 @@ fitImportance <- train(log(SumChartStreams) ~ liveness + danceability +
                        preProcess="scale", 
                        trControl=control)
 
-
-
-
-
-
 ```
 
 The importance ratings are determined by calculating the MSE on out of bag data for each of the trees, then MSE is computed after permuting a variable. The difference from the 2 accuracies are then averaged and normalized by the standard deviation and scaled to be between 0 and 100. Below we can see that the log count of days on the charts, the minimum position, date index, max position, and track popularity all have the highest importance scores for predicting the sum of streams while the track was on the charts.
@@ -115,7 +80,6 @@ One caveat to take into consideration is that random forest models do not accoun
 ```{r, message=F, warning=F}
 
 # Create a matrix of the important independent variables selected from the random forest.
-
 CorMatrix <- SpotifyData[ , c("CountOnCharts", 
                                "minPosition",
                                "DateIndex", 
@@ -136,34 +100,21 @@ The illustration above shows that minPosition and TrackPopularity have moderate 
 
 ```{r}
 
-
-
-
 # Fit an OLS model with the important features from the fitImportance random forest model
-
 fit <- lm(log(SumChartStreams) ~ 
             MaxPosition +  
             DateIndex + 
             log(CountOnCharts),
           data = training)
 
-
-
-
 # View the summary statistics from the OLS model created above
 
-
 summary(fit)
-
-
-
 ```
 
 
 ```{r}
-
 anova(fit)
-
 ```
 Next, to make sure that there aren't any lurking multicollinearity issues a variable inflation test will be performed. If any of the variables have a vif score of 10 or above they should be removed from the model.
 
@@ -186,8 +137,6 @@ plot(fit)
 plot(fit$residuals)
 
 hist(fit$residuals, col = "red")
-
-
 ```
 
 Finally to get a an idea of the accuracy of the model, the predicted estimates for log(SumOnCharts) are plotted against the actual observed values for both the training and testing data sets below. If testing predicted values are not very close to the observed values we can deduce that the model is overfitting the data. 
