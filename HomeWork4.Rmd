@@ -1,0 +1,193 @@
+---
+title: "Homework 4"
+author: "Karl Konz"
+date: "September 17, 2016"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Problem 1
+
+##Which of the following can cause the usual OLS t statistics to be invalid (that is, not to have t distributions under Ho)?
+
+(i.) Heteroskedasticity and (iii.) Omitting an important expanatory variable can cuase the usual OLS t statistics to be invalid. Heteroskedasticity is one of the central limit assumptions and removing an important explanatory variable violates  the 3rd MLR assumption. As long as the correlation between 2 explanatory variables is not 1 than no assumptions have been violated.
+
+#Problem 4
+##(i). State the null hypothesis that size of the student body relative to the population has no ceteris paribus effect on monthly rents. State the alternative that there is an effect.
+
+The null hypothesis would state that there is significant evidence that the size of the student body does not have an effect on with monthly rents while holding total city population fixed. Another way of stating the null hypothesis is that there is significant evidence that coefficient for student body is equal to zero in this model. 
+An alternative would state that there is significant evidence that the student population has effect on the monthly rents while holding total city population fixed. Another way of stating Ha would be there is significant evidence that the coefficient for student body is not equal to zero in this model.
+
+##(ii). What signs do you expect for B1 and B2?
+
+I would expect the B1 and B2 coefficients to both be positive. As the population or average income increases, it makes sense that both would likely cause rent to increase as well.
+
+##(iii). What is wrong with the statement: "A a 10% increase in population with about a 6.6% increase in rent?"
+
+The actual percentage increase would be .66%, not 6.6%.
+
+
+```{r}
+.1 * .066 * 100
+
+```
+
+
+##(iv). Test the hypothesis stated in part (i) at 1% level.
+Based on the data above, we can accept the null hypothesis at alpha = 1%. The p value for log population is at .095. In order to have rejected the null hypothesis for the lpop ceteris paribus test we would need to see a p value of .01 or less for that coefficient. 
+
+#Problem 10
+
+##(i). Using the data in RETURN.RAW, test whether the explanatory variables are jointly significant at 5%. Is there any explanatory variable individually significant?
+
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/RETURN.Rdata")
+fit <- lm(return ~ dkr + eps + netinc + salary, data = data)
+
+```
+
+
+
+```{r, fig.height=5, fig.width= 10}
+library(gridExtra); library(gtable); library(grid)
+tt <- ttheme_default(base_size = 9, colhead=list(fg_params = list(parse=TRUE))) #, rows=NULL
+coefTable <- data.frame(summary(fit)$coefficients)
+tt <- ttheme_default(colhead=list(fg_params = list(parse=TRUE))) #, rows=NULL
+g <- tableGrob(coefTable, theme = tt)
+grid.newpage()
+grid.draw(g)
+
+```
+
+The individual p values for each of the coefficients is quite large and thus there is significant evidence that none of the terms should be used in this model. The overal F statistic is also quite low, with a relatively large p value indicating we should not use this model in general.
+
+##(ii). Reestimate the model using the log form for netinc and salary. Do any of your conclusions from part (i) change?
+
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/RETURN.Rdata")
+fit <- lm(return ~ dkr + eps + lnetinc + lsalary, data = data)
+summary(fit)
+```
+The p value for salary actually went up when using the log value and the net income p value only went down slightly when using the log value. These changes actually make the overall model do slightly worse, with a new p value for the f statistic at .25. The overall conclusion would still be to not use this model.
+
+##(iii). In this sample, some firms have zero debt and others have negative earnings. Should we try to use log(dkr) or log(eps) in the model to see if these improve the fit? Explain.
+
+No, simply because you mathematically cannot take the log of a negative or zero value.
+
+##(iv). Overall, is the evidence for predictability of stock returns strong or weak?
+
+Over the predictability of stocks is very weak. The F stat is low and it's p value is quite high in the models we have fit. The R squared value is very low too. With only a fraction of a percent of the variation in the dependant variable being explained by the model.
+
+#Computer Exercise 1
+##(i).What is the interpretation of B1?
+Holding the other factors fixed, where 100* log(exendA) is equal to the an increase of roughly 1% in VoteA when Expend A is increased by 1%.
+
+##(ii). In terms of the parameters, state the null hupothesis that a 1% increase in A's expenditires is offset by a 1% increase in B's Expenditures.
+The null hypothesis would be that the effects of A are counteracted by the effects of B. In other words B1 + B2 = 0.
+
+##(iii). 
+
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/VOTE1.Rdata")
+fit <- lm(voteA ~ lexpendA + lexpendB + prtystrA, data = data)
+summary(fit)
+```
+
+A 10% increase in expenditures A results in an estimated .61 increase of the vote going to A by about .61 percentage points. We cannot test the null hypothesis that lexpendB offsets lexpendsA we do not have the standard error of estimated lexpendA coefficient + estimated lexpendB coefficient.
+
+##(iv).
+```{r}
+data$derivedAminusB <- data$lexpendB - data$lexpendA
+fit2 <- lm(voteA ~ lexpendA + derivedAminusB + prtystrA, data = data)
+summary(fit2)
+
+```
+The t value for the derived value, derivedAminusB, is about -1 yielding a p value of about .32. Therefore we can conclude that we do not have significant evidence that the derived value is a significant predictor in this model and can thus rejuect the null hypothesis that B2 = - B1.
+
+#Computer Exercise 2
+##(i). State and test the null hypothesis that the rank of law schools has no ceteris paribus effect on median starting salary.
+One way of phrasing the null hypothesis would be to say that there is significant evidence, with an alpha value of 5%, that the coefficient for rank equals 0 in this model. Another way of stating it could be there is significant evidence that there is that rank does not have an effect on median starting salary while holding the other values in this model fixed. 
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/LAWSCH85.Rdata")
+fit <- lm(lsalary ~ LSAT + GPA + llibvol + lcost + rank, data = data)
+summary(fit)
+```
+
+By looking at the p value for rank we can reject the null hypothesis and say that there is significant evidence that rank has an effect on median starting salary in this model while holding the other coefficients constant. The p value for rank is well below the .05 threshold that we tested against.
+
+##(ii). Are features of the incoming class of students -- namely, LSAT and GPA -- individually or jointly significant for explaining salary?
+
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/LAWSCH85.Rdata")
+
+fit <- lm(lsalary ~ LSAT + GPA + llibvol + lcost + rank, data = data)
+summary(fit)
+```
+
+The coefficient for GPA looks to be significant in this model but LSAT does not. Next let's look if combining the values into a derived value has a more significant coefficient.
+```{r}
+data$LsatNGpa <- data$LSAT + data$GPA
+fit2 <- lm(lsalary ~ LsatNGpa + llibvol + lcost + rank, data = data)
+summary(fit2)
+
+fit3 <- lm(lsalary ~ LSAT + llibvol + lcost + rank, data = data)
+summary(fit3)
+
+fit4 <- lm(lsalary ~ GPA + llibvol + lcost + rank, data = data)
+summary(fit4)
+
+cor(data$LSAT, data$GPA, use = "complete")
+```
+We can see from the different models above that individually GPA and LSAT, as well as when add them together as a derived term, are statistically significant in the models. When LSAT and GPA are used individually in the same model, see the model fit above, the LSAT term is not significant. By testing the correlation between the 2 attributes we can see that they are fairly highly correlated and should not be used together as seperate coefficients in the same model. 
+
+##(iii). Test whether the size of the entering class (clsize) or the size of the faculty (faculty) needs to be added to this equation: carry out a single test. (Be careful to account for missing data on clsize and faculty). 
+
+
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/LAWSCH85.Rdata")
+
+fit <- lm(lsalary ~ faculty + clsize + GPA + llibvol + lcost + rank, data = data)
+summary(fit)
+```
+
+We can see from the model produced above that neither faculty and clsize should be used in this model as the p values for the faculty and clsize coefficients are quite high.
+
+##(iv). What factors might influence the rank of the law school that are not included in the salary regression?
+Job placement rates, diversity, and scholarships/grants/awards may influence the rank of the law school in the salary regression.
+
+#Computer Exercise 5
+##(i). Use the model estimated in equation (4.31) and drop the variable rbisyr. What happens to the statistical significance of hrunsyr? What about the size of the coefficient on hrynsyr?
+
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/MLB1.Rdata")
+
+fit <- lm(lsalary ~ years + gamesyr + bavg + hrunsyr, data = data)
+summary(fit)
+```
+
+As shown above the coefficient for is very statistically significant, with a p value very close to zero, its coefficient has increased by about 2 1/2 times the previous value.
+
+##(ii).
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/MLB1.Rdata")
+
+fit <- lm(lsalary ~ years + gamesyr + bavg + hrunsyr + runsyr + fldperc + sbasesyr, data = data)
+summary(fit)
+```
+
+Runsyr is the most statistically significant addition to the model, with a p value of about .0007. The other 2 variables added to the model have relatively high p values and do not add any statistical significance to the model.
+
+##(iii).
+
+```{r}
+load("C:/Users/karlk/Desktop/EconometricsData/R data sets for 5e/MLB1.Rdata")
+
+fit <- lm(lsalary ~ bavg + fldperc + sbasesyr, data = data)
+summary(fit)
+library(car)
+
+linearHypothesis(fit, c("bavg", "fldperc", "sbasesyr"))
+```
